@@ -65,3 +65,7 @@ func(this *BaseController)ReturnJson(data interface{},status int){
 	this.Ctx.Output.Status = status
 	this.Ctx.Output.JSON(data,true,false)
 }
+
+func(this *BaseController)Wel(){
+	this.TplName = "welcome.html"
+}

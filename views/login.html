@@ -54,29 +54,37 @@
                       dataType: "json",//预期服务器返回的数据类型
                       url: "/login" ,//url
                       data: data.field,
-                      success: function (result) {
-                          console.log(result);//打印服务端返回的数据(调试用)
-                          if (result.status ==400){
-                              layer.msg("状态吗等于400",function(){
-                              });
+                      complete:function(XMLHttpRequest,testStatus){
+                          console.log(XMLHttpRequest)
+                          console.log(XMLHttpRequest.status)
+                          console.log(XMLHttpRequest.responseJSON.message,)
+
+                          if (XMLHttpRequest.status == 400){
+                              layer.alert("这里是400",{icon:5})
                           }
-                          if (result.status == 200) {
-                              layer.msg(result.message,function(){
-                                  location.href='/index'
-                              });
-                          }
+                          if (XMLHttpRequest.status == 200) {
+                              //弹出即全屏
+
+                              // var index = layer.open({
+                              //     type: 2,
+                              //     content: 'http://wwww.baidu.com',
+                              //     area: ['320px', '195px'],
+                              //     maxmin: true
+                              // });
+                              // layer.full(index);
 
 
+                              //layer.alert(XMLHttpRequest.responseJSON.message,{icon: 6})
+                              location.href='/index'
+                          }
                       },
-                      error : function() {
-                          layer.msg("路由没有走通",function(){});
-                      }
-                  });
-                layer.msg(JSON.stringify(data.field),function(){
 
-                    //location.href='/index'
-                });
-                  //
+                  });
+                // layer.msg(JSON.stringify(data.field),function(){
+                //
+                //     //location.href='/index'
+                // });
+
                 return false;
               });
             });
