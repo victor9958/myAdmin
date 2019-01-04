@@ -22,7 +22,7 @@
         <div class="message">x-admin2.0-管理登录</div>
         <div id="darkbannerwrap"></div>
         
-        <form method="post" class="layui-form" >
+        <form method="post" class="layui-form">
             <input name="user" placeholder="用户名"  type="text" lay-verify="required" class="layui-input" >
             <hr class="hr15">
             <input name="pwd" lay-verify="required" placeholder="密码"  type="password" class="layui-input">
@@ -34,6 +34,10 @@
 
     <script>
         $(function  () {
+
+
+
+
             layui.use('form', function(){
               var form = layui.form;
               // layer.msg('玩命卖萌中', function(){
@@ -42,11 +46,37 @@
               //监听提交
               form.on('submit(login)', function(data){
                 // alert(888)
-                  console.log(data)
-                // layer.msg(JSON.stringify(data.field),function(){
-                //     console.log(data)
-                //     //location.href='/index'
-                // });
+                  console.log(data);
+
+                  $.ajax({
+                      //几个参数需要注意一下
+                      type: "POST",//方法类型
+                      dataType: "json",//预期服务器返回的数据类型
+                      url: "/login" ,//url
+                      data: data.field,
+                      success: function (result) {
+                          console.log(result);//打印服务端返回的数据(调试用)
+                          if (result.status ==400){
+                              layer.msg("状态吗等于400",function(){
+                              });
+                          }
+                          if (result.status == 200) {
+                              layer.msg(result.message,function(){
+                                  location.href='/index'
+                              });
+                          }
+
+
+                      },
+                      error : function() {
+                          layer.msg("路由没有走通",function(){});
+                      }
+                  });
+                layer.msg(JSON.stringify(data.field),function(){
+
+                    //location.href='/index'
+                });
+                  //
                 return false;
               });
             });
