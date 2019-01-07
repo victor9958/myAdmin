@@ -10,9 +10,11 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="static/css/font.css">
     <link rel="stylesheet" href="static/css/xadmin.css">
+    <link rel="stylesheet" href="static/css/myPagination.css">
     <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
     <script type="text/javascript" src="static/lib/layui/layui.js" charset="utf-8"></script>
     <script type="text/javascript" src="static/js/xadmin.js"></script>
+    <script type="text/javascript" src="static/js/myPagination.js"></script>
     <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
     <!--[if lt IE 9]>
       <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
@@ -62,46 +64,17 @@
             <th>操作</th></tr>
         </thead>
         <tbody>
-          <tr>
-            <td>
-              <div class="layui-unselect layui-form-checkbox" lay-skin="primary" data-id='2'><i class="layui-icon">&#xe605;</i></div>
-            </td>
-            <td>1</td>
-            <td>小明</td>
-            <td>男</td>
-            <td>13000000000</td>
-            <td>admin@mail.com</td>
-            <td>北京市 海淀区</td>
-            <td>2017-01-01 11:11:42</td>
-            <td class="td-status">
-              <span class="layui-btn layui-btn-normal layui-btn-mini">已启用</span></td>
-            <td class="td-manage">
-              <a onclick="member_stop(this,'10001')" href="javascript:;"  title="启用">
-                <i class="layui-icon">&#xe601;</i>
-              </a>
-              <a title="编辑"  onclick="x_admin_show('编辑','member-edit.html',600,400)" href="javascript:;">
-                <i class="layui-icon">&#xe642;</i>
-              </a>
-              <a onclick="x_admin_show('修改密码','member-password.html',600,400)" title="修改密码" href="javascript:;">
-                <i class="layui-icon">&#xe631;</i>
-              </a>
-              <a title="删除" onclick="member_del(this,'要删除的id')" href="javascript:;">
-                <i class="layui-icon">&#xe640;</i>
-              </a>
-            </td>
-          </tr>
-
         {{range $k,$v := .list}}
 
         <tr>
             <th>
                 <div class="layui-unselect header layui-form-checkbox" lay-skin="primary"><i class="layui-icon">&#xe605;</i></div>
             </th>
-            <th id="id">{{$v.Id}}</th>
+            <th id="getId" data-id="{{$}}">{{$v.Id}}</th>
             <th>{{$v.Name}}</th>
             <td>{{if eq $v.Sex 1}}男{{else if eq $v.Sex 2}}女{{else}}未知{{end}}</td>
-            <td>{{$v.mobile}}</td>
-            <td>{{$v.email}}</td>
+            <td>{{$v.Mobile}}</td>
+            <td>{{$v.Email}}</td>
             <td>北京市 海淀区</td>
             <td>2017-01-01 11:11:42</td>
             <td class="td-status">
@@ -116,7 +89,7 @@
                 <a onclick="x_admin_show('修改密码','member-password.html',600,400)" title="修改密码" href="javascript:;">
                     <i class="layui-icon">&#xe631;</i>
                 </a>
-                <a title="删除" onclick="member_del(this,'要删除的id')" href="javascript:;">
+                <a title="删除" data-id="{{$v.Id}}}" onclick="member_del(this,{{$v.Id}})" href="javascript:;">
                     <i class="layui-icon">&#xe640;</i>
                 </a>
             </td>
@@ -127,19 +100,48 @@
 
         </tbody>
       </table>
-      <div class="page">
-        <div>
-          <a class="prev" href="">&lt;&lt;</a>
-          <a class="num" href="">1</a>
-          <span class="current">2</span>
-          <a class="num" href="">3</a>
-          <a class="num" href="">489</a>
-          <a class="next" href="">&gt;&gt;</a>
-        </div>
-      </div>
+      {{/*<div class="page">*/}}
+        {{/*<div>*/}}
+          {{/*<a class="prev" href="">&lt;&lt;</a>*/}}
+          {{/*<a class="num" href="">1</a>*/}}
+          {{/*<span class="current">2</span>*/}}
+          {{/*<a class="num" href="">3</a>*/}}
+          {{/*<a class="num" href="">489</a>*/}}
+          {{/*<a class="next" href="">&gt;&gt;</a>*/}}
+        {{/*</div>*/}}
+      {{/*</div>*/}}
+
+
+        <div id="pagination" class="pagination"></div>
 
     </div>
     <script>
+        window.onload = function () {
+            var limit = 10
+            new Page({
+                id: 'pagination',
+                pageTotal: {{.count_page}}, //必填,总页数
+                pageAmount: limit,  //每页多少条
+                dataTotal: {{.count}}, //总共多少条数据
+                curPage:1, //初始页码,不填默认为1
+                pageSize: 5, //分页个数,不填默认为5
+                //showPageTotalFlag:true, //是否显示数据统计,不填默认不显示
+                showSkipInputFlag:true, //是否支持跳转,不填默认不显示
+                getPage: function (page) {
+                    //获取当前页数
+                    location.href = "/member-list?page="+page+"&limit="+limit;
+                }
+            })
+            $("#pagination ul li").each(function () {
+                var nowPage = {{.now_page}}
+                if ($(this).text()==nowPage){
+                    $(this).addClass("active")
+                }else{
+                    $(this).toggleClass("active")
+                }
+            });
+        };
+
       layui.use('laydate', function(){
         var laydate = layui.laydate;
         
@@ -181,13 +183,13 @@
       /*用户-删除*/
       function member_del(obj,id){
           layer.confirm('确认要删除吗？',function(index){
-
+            console.log(id);
               $.ajax({
                   //几个参数需要注意一下
                   type: "DELETE",//方法类型
                   dataType: "json",//预期服务器返回的数据类型
-                  url: "/member-del" ,//url
-                  data: data.field,
+                  url: "/member-del?id="+id ,//url
+                  //data: {id:"403"},
                   complete:function(XMLHttpRequest,testStatus){
                       if (XMLHttpRequest.status == 400){
                           layer.alert(XMLHttpRequest.responseJSON.message,{icon:5})

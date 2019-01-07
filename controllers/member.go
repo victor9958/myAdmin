@@ -19,20 +19,36 @@ func(this *MemberController)List(){
 		startTime = startTime+" 00:00:00"
 		endTime = endTime+" 23:59:59"
 		//时间参数
-		o.Filter("created_at__between",startTime,endTime)
+		o = o.Filter("created_at__between",startTime,endTime)
 	}
 
 	if userName := this.GetString("username");userName != "" {
 		//用户姓名
-		o.Filter("name",userName)
+		o =o.Filter("name",userName)
 	}
-	_,err := o.All(&admin)
+	o =o.Filter("deleted_at__isnull",true)
+	//count,err3 := o.Count()
+	beego.Info("member-getPage之前")
+	o,myPage,err3:=this.GetPage(o)
+	if err3 != nil {
+		this.ReturnJson(map[string]string{"message":"分页错误"},400)
+	}
+
+	_,err :=o.All(&admin)
 	if err != nil {
 		this.ReturnJson(map[string]string{"message":"查询错误"},400)
 	}
-
+	////每页几条
+	//limit := 10
+	////总页数
+	//countPage := int(count)/limit
+	//if m := int(count)%limit;m>0 {
+	//	countPage++
+	//}
+	this.Data["count_page"] = myPage.CountPage
 	this.Data["list"] = admin
-	beego.Info(admin)
+	this.Data["count"] = myPage.Count
+	this.Data["now_page"] = myPage.NowPage
 
 
 	this.TplName="member-list.html"
@@ -52,9 +68,10 @@ func(this *MemberController)Del(){
 		"deleted_at":delTime,
 	})
 
-
-
-	
+	if err != nil && num > 0 {
+		this.ReturnJson(map[string]string{"message":"删除失败"},400)
+	}
+	this.ReturnJson(map[string]string{"message":"删除成功"},200)
 
 
 }
