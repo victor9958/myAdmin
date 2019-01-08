@@ -12,6 +12,8 @@ func init() {
 	beego.Router("/wel", &controllers.BaseController{},"get:Wel")
 
 	beego.Router("/member-list", &controllers.MemberController{},"get:List")
+	beego.Router("/member-list2", &controllers.MemberController{},"get:List2")
+	beego.Router("/member-list2-data", &controllers.MemberController{},"get:ListData")
 	beego.Router("/member-del", &controllers.MemberController{},"delete:Del")
 
 }

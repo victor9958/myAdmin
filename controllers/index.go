@@ -8,3 +8,4 @@ func (this *IndexController) Index() {
 	this.TplName = "index.html"
 }
 
+
