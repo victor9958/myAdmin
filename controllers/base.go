@@ -114,3 +114,9 @@ func(this *BaseController)GetPage(o orm.QuerySeter)(orm.QuerySeter,*MyPage,error
 
 	return o.Limit(myPage.Limit,(myPage.NowPage-1)*myPage.Limit),&myPage,nil
 }
+
+
+func MakeMd5(str string)string{
+	has := md5.Sum([]byte(str+"yan"))
+	return fmt.Sprintf("%x",has)
+}

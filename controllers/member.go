@@ -60,10 +60,28 @@ func(this *MemberController)List(){
 	用户列表 ui框架
  */
 func(this *MemberController)List2(){
-
-
-
 	this.TplName="member-list2.html"
+}
+
+/*
+	用户列表 ui框架
+ */
+func(this *MemberController)List3(){
+	this.TplName="member-list3.html"
+}
+
+/*
+	跳添加页面
+ */
+func(this *MemberController)Add(){
+	this.TplName="member-add.html"
+}
+
+func(this *MemberController)AddAdmin{
+	name := this.GetString("name")
+	if name == "" {
+		//this.ReturnJson(map[string]string)
+	}
 }
 /*
 	用户列表 的 table 数据
@@ -92,7 +110,21 @@ func(this *MemberController)ListData(){
 	if err != nil {
 		this.ReturnJson(map[string]string{"message":"查询错误"},400)
 	}
-	this.ReturnJson(map[string]interface{}{"code":0,"data":admin,"count":myPage.Count},200)
+
+	var adminData []*model.AdminData
+
+
+	for _,v := range admin {
+		sexName := ""
+		switch v.Sex {
+			case 0:sexName = "未知"
+			case 1:sexName = "男"
+			case 2:sexName = "女"
+			default:sexName = ""
+		}
+		adminData = append(adminData,&model.AdminData{v,sexName})
+	}
+	this.ReturnJson(map[string]interface{}{"code":0,"data":adminData,"count":myPage.Count},200)
 }
 
 

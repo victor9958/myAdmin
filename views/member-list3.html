@@ -42,17 +42,38 @@
       </div>
       <xblock>
         <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="layui-icon"></i>批量删除</button>
-        <button class="layui-btn" onclick="x_admin_show('添加用户','./member-add.html',600,400)"><i class="layui-icon"></i>添加</button>
+        <button class="layui-btn" onclick="x_admin_show('添加用户','member-add',600,400)"><i class="layui-icon"></i>添加</button>
         <span class="x-right" style="line-height:40px">共有数据：88 条</span>
       </xblock>
-      <table  lay-filter="member-data"  id="member">
-          <script type="text/html" id="barDemo">
-              <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
-              <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-              <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
-          </script>
+      {{/*<table  lay-filter="member-data"  id="member"></table>*/}}
 
-      </table>
+
+
+
+        <table lay-filter="member-data"  class="layui-table" lay-data="{width: 892, height:666, url:'/member-list2-data', page:true, id:'member'}" >
+            <thead>
+            <tr>
+                <th lay-data="{type:'checkbox', fixed: 'left'}"></th>
+                <th lay-data="{field:'id', width:80, sort: true, fixed: true}">ID</th>
+                <th lay-data="{field:'name', width:80}">用户名</th>
+                <th lay-data="{field:'sex', width:80, sort: true}">性别</th>
+                <th lay-data="{field:'email', width:80}">城市</th>
+                <th lay-data="{field:'mobile', width:160}">签名</th>
+                <th lay-data="{field:'sex_name', width:80, sort: true}">性别</th>
+
+                <th lay-data="{field:'classify', width:80}">职业</th>
+                <th lay-data="{field:'wealth', width:135, sort: true}">财富</th>
+                <th lay-data="{field:'score', width:80, sort: true, fixed: 'right'}">评分</th>
+                <th lay-data="{fixed: 'right', width:178, align:'center', toolbar: '#barDemo'}"></th>
+            </tr>
+            </thead>
+        </table>
+
+        <script type="text/html" id="barDemo">
+            <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+            <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+        </script>
 
 
 
@@ -61,38 +82,71 @@
 
         layui.use("table",function () {
             var table = layui.table;
-            table.render({
-                elem: '#member'
-                ,url:'/member-list2-data'
-                ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
-                ,cols: [[
-                    {field:'id', width:80, title: 'ID', sort: true},
-                    {field:'name', width:80, title: '姓名'},
-                    {field:'email', width:80, title: '邮箱', sort: true},
-                    {field:'mobile', width:80, title: '手机号', sort: true},
-                    {field:'sex_name', width:80, title: '性别', sort: true},
-                    {field:'id', width:80, title: 'ID', sort: true},
 
-                ]]
-                ,page: true
+
+            //监听表格复选框选择
+            table.on('checkbox(member-data)', function(obj){
+                console.log(obj)
             });
+            //监听工具条
+            table.on('tool(member-data)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'detail'){
+                    layer.msg('ID：'+ data.id + ' 的查看操作');
+                } else if(obj.event === 'del'){
+                    layer.confirm('真的删除行么', function(index){
+                        obj.del();
+
+                        $.ajax({
+                            //几个参数需要注意一下
+                            type: "DELETE",//方法类型
+                            dataType: "json",//预期服务器返回的数据类型
+                            url: "/member-del?id="+data.id ,//url
+                            //data: {id:"403"},
+                            complete:function(XMLHttpRequest,testStatus){
+                                if (XMLHttpRequest.status == 400){
+                                    layer.alert(XMLHttpRequest.responseJSON.message,{icon:5})
+                                }
+                                if (XMLHttpRequest.status == 200) {
+                                    layer.alert(XMLHttpRequest.responseJSON.message,{icon: 6})
+                                }
+                            },
+
+                        });
+
+
+                        layer.close(index);
+                    });
+                } else if(obj.event === 'edit'){
+                    layer.alert('编辑行：<br>'+ JSON.stringify(data))
+                }
+            });
+
+            var $ = layui.$, active = {
+                getCheckData: function(){ //获取选中数据
+                    var checkStatus = table.checkStatus('member')
+                            ,data = checkStatus.data;
+                    layer.alert(JSON.stringify(data));
+                }
+                ,getCheckLength: function(){ //获取选中数目
+                    var checkStatus = table.checkStatus('member')
+                            ,data = checkStatus.data;
+                    layer.msg('选中了：'+ data.length + ' 个');
+                }
+                ,isAll: function(){ //验证是否全选
+                    var checkStatus = table.checkStatus('member');
+                    layer.msg(checkStatus.isAll ? '全选': '未全选')
+                }
+            };
+
+            $('.demoTable .layui-btn').on('click', function(){
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+
+
+
         });
-
-
-          //
-          // layui.use('laydate', function(){
-          //   var laydate = layui.laydate;
-          //
-          //   //执行一个laydate实例
-          //   laydate.render({
-          //     elem: '#start' //指定元素
-          //   });
-          //
-          //   //执行一个laydate实例
-          //   laydate.render({
-          //     elem: '#end' //指定元素
-          //   });
-          // });
 
        /*用户-停用*/
       function member_stop(obj,id){

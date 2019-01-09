@@ -25,3 +25,10 @@ type Admin struct {
 
 }
 
+type AdminData struct {
+	*Admin
+	SexName string 			`json:"sex_name"`
+}
+
+
+
