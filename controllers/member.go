@@ -77,11 +77,38 @@ func(this *MemberController)Add(){
 	this.TplName="member-add.html"
 }
 
-func(this *MemberController)AddAdmin{
+func(this *MemberController)AddAdmin(){
+	var admin model.Admin
 	name := this.GetString("name")
 	if name == "" {
-		//this.ReturnJson(map[string]string)
+		this.ReturnJson(map[string]string{"message":"名称必填"},400)
 	}
+	admin.Name = name
+	pwd := this.GetString("pwd")
+	pwd2 := this.GetString("pwd2")
+	if pwd == "" || pwd2 == "" || pwd != pwd2 {
+		this.ReturnJson(map[string]string{"message":"密码格式不正确"},400)
+	}
+	pwdMd5 := MakeMd5(pwd+"yan")
+	admin.Password = pwdMd5
+	mobile := this.GetString("mobile")
+	if mobile == "" {
+
+		this.ReturnJson(map[string]string{"message":"手机号不正确"},400)
+	}
+	exist := orm.NewOrm().QueryTable("admin").Filter("mobile",mobile).Exist()
+	if exist {
+		this.ReturnJson(map[string]string{"message":"手机号已存在"},400)
+	}
+	admin.Mobile = mobile
+
+	_,err := orm.NewOrm().Insert(&admin)
+
+	if err != nil {
+		this.ReturnJson(map[string]string{"message":"插入数据错误"+err.Error()},400)
+	}
+
+	this.ReturnJson(map[string]string{"message":"添加成功"},200)
 }
 /*
 	用户列表 的 table 数据
@@ -100,7 +127,7 @@ func(this *MemberController)ListData(){
 		//用户姓名
 		o =o.Filter("name",userName)
 	}
-	o =o.Filter("deleted_at__isnull",true)
+	o =o.Filter("deleted_at__isnull",true).OrderBy("-id")
 	o,myPage,err3:=this.GetPage(o)
 	if err3 != nil {
 		this.ReturnJson(map[string]string{"message":"分页错误"},400)

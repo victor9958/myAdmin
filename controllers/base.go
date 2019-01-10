@@ -81,6 +81,8 @@ func(this *BaseController)Wel(){
 
 //分页
 func(this *BaseController)GetPage(o orm.QuerySeter)(orm.QuerySeter,*MyPage,error){
+
+
 	var myPage MyPage
 	myPage.Limit = 10
 	myPage.NowPage = 1

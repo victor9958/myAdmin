@@ -25,10 +25,10 @@
         <form class="layui-form">
           <div class="layui-form-item">
               <label for="L_email" class="layui-form-label">
-                  <span class="x-red">*</span>邮箱
+                  <span class="x-red">*</span>手机号
               </label>
               <div class="layui-input-inline">
-                  <input type="text" id="L_email" name="email" required="" lay-verify="email"
+                  <input type="text" id="L_mobile" name="mobile" required="" lay-verify="mobile"
                   autocomplete="off" class="layui-input">
               </div>
               <div class="layui-form-mid layui-word-aux">
@@ -36,11 +36,11 @@
               </div>
           </div>
           <div class="layui-form-item">
-              <label for="L_username" class="layui-form-label">
+              <label for="L_name" class="layui-form-label">
                   <span class="x-red">*</span>昵称
               </label>
               <div class="layui-input-inline">
-                  <input type="text" id="L_username" name="username" required="" lay-verify="nikename"
+                  <input type="text" id="L_name" name="name" required="" lay-verify="nikename"
                   autocomplete="off" class="layui-input">
               </div>
           </div>
@@ -49,7 +49,7 @@
                   <span class="x-red">*</span>密码
               </label>
               <div class="layui-input-inline">
-                  <input type="password" id="L_pass" name="pass" required="" lay-verify="pass"
+                  <input type="password" id="L_pass" name="pwd" required="" lay-verify="pass"
                   autocomplete="off" class="layui-input">
               </div>
               <div class="layui-form-mid layui-word-aux">
@@ -61,7 +61,7 @@
                   <span class="x-red">*</span>确认密码
               </label>
               <div class="layui-input-inline">
-                  <input type="password" id="L_repass" name="repass" required="" lay-verify="repass"
+                  <input type="password" id="L_repass" name="pwd2" required="" lay-verify="repass"
                   autocomplete="off" class="layui-input">
               </div>
           </div>
@@ -83,7 +83,7 @@
           //自定义验证规则
           form.verify({
             nikename: function(value){
-              if(value.length < 5){
+              if(value.length < 3){
                 return '昵称至少得5个字符啊';
               }
             }
@@ -99,12 +99,31 @@
           form.on('submit(add)', function(data){
             console.log(data);
             //发异步，把数据提交给php
-            layer.alert("增加成功", {icon: 6},function () {
-                // 获得frame索引
-                var index = parent.layer.getFrameIndex(window.name);
-                //关闭当前frame
-                parent.layer.close(index);
-            });
+
+              $.ajax({
+                  //几个参数需要注意一下
+                  type: "POST",//方法类型
+                  dataType: "json",//预期服务器返回的数据类型
+                  url: "/member-add-admin" ,//url
+                  data: data.field,
+                  complete:function(XMLHttpRequest,testStatus){
+                      console.log(XMLHttpRequest)
+                      console.log(XMLHttpRequest.status)
+                      console.log(XMLHttpRequest.responseJSON.message,)
+
+                      if (XMLHttpRequest.status == 400){
+                          layer.alert(XMLHttpRequest.responseJSON.message,{icon:5})
+                      }
+                      if (XMLHttpRequest.status == 200) {
+                          layer.alert(XMLHttpRequest.responseJSON.message,{icon:4})
+                          var index = parent.layer.getFrameIndex(window.name);
+                          //关闭当前frame
+                          parent.layer.close(index);
+                          parent.location.reload();
+                      }
+                  },
+
+              });
             return false;
           });
           
